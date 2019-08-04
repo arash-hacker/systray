@@ -43,9 +43,14 @@ func onReady() {
 
 		mUrl := systray.AddMenuItem("Open Lantern.org", "my home")
 
+		/*     */
+		mUrl.SetIcon(getIcon("assets/hacker.ico"))
+		mmmmm := mUrl.AddSubMenuItem("mmmmmmmUrl-Sub2", "mmmmmmUrl-Sub2")
+		mmmmm.SetTitle("uuuuuuu")
 		mUrlSub := mUrl.AddSubMenuItem("mUrl-Sub1", "mUrl-Sub1")
-		/*      */ mUrl.AddSubMenuItem("mUrl-Sub2", "mUrl-Sub2")
-		/*      */ mUrl.AddSubMenuItem("mUrl-Sub3", "mUrl-Sub3")
+		mUrlSub.SetIcon(getIcon("assets/hacker.ico"))
+		/*      */
+		mUrl.AddSubMenuItem("mUrl-Sub3", "mUrl-Sub3")
 
 		mUrilSubSub := mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub1", "mUrl-Sub1-Sub1")
 		/*          */ mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub2", "mUrl-Sub1-Sub2")
@@ -63,11 +68,17 @@ func onReady() {
 		shown := true
 		for {
 			select {
-
+			case <-mmmmm.ClickedCh:
+				fmt.Println("mmmmm")
+				if mmmmm.Checked() {
+					mmmmm.Uncheck()
+					mmmmm.SetTitle("Arash unchecked")
+				} else {
+					mmmmm.Check()
+					mmmmm.SetTitle("Arach checked")
+				}
 			case <-mUrlSub.ClickedCh:
 				fmt.Println("murl")
-			case <-mUrilSubSub.ClickedCh:
-				fmt.Println("murlSubSub")
 
 			case <-mChange.ClickedCh:
 				mChange.SetTitle("I've Changed")
