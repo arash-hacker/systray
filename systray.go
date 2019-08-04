@@ -104,6 +104,14 @@ func AddMenuItem(title string, tooltip string) *MenuItem {
 func AddSeparator() {
 	addSeparator(atomic.AddInt32(&currentID, 1))
 }
+func (item *MenuItem) AddSubMenuItem(title string, tooltip string) *MenuItem {
+	id := atomic.AddInt32(&currentID, 1)
+	_item := &MenuItem{nil, id, title, tooltip, false, false}
+	_item.ClickedCh = make(chan struct{})
+	//_item.update(item)
+	item.updateSub(_item)
+	return _item
+}
 
 // SetTitle set the text to display on a menu item
 func (item *MenuItem) SetTitle(title string) {
@@ -167,6 +175,12 @@ func (item *MenuItem) update() {
 	defer menuItemsLock.Unlock()
 	menuItems[item.id] = item
 	addOrUpdateMenuItem(item)
+}
+func (item *MenuItem) updateSub(subItem *MenuItem) {
+	menuItemsLock.Lock()
+	defer menuItemsLock.Unlock()
+	menuItems[subItem.id] = subItem
+	addOrUpdateSubMenuItem(item, subItem)
 }
 
 func systrayMenuItemSelected(id int32) {

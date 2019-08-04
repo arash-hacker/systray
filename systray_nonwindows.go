@@ -12,6 +12,7 @@ package systray
 import "C"
 
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -59,6 +60,26 @@ func addOrUpdateMenuItem(item *MenuItem) {
 		checked,
 	)
 }
+func addOrUpdateSubMenuItem(item *MenuItem, subItem *MenuItem) {
+	var disabled C.short
+	if subItem.disabled {
+		disabled = 1
+	}
+	var checked C.short
+	if subItem.checked {
+		checked = 1
+	}
+	fmt.Println(item.id, subItem.id)
+
+	C.add_or_update_submenu_item(
+		C.int(item.id),
+		C.int(subItem.id),
+		C.CString(subItem.title),
+		C.CString(subItem.tooltip),
+		disabled,
+		checked,
+	)
+}
 
 // SetIcon sets the icon of a menu item. Only available on Mac.
 // iconBytes should be the content of .ico/.jpg/.png
@@ -81,6 +102,7 @@ func showMenuItem(item *MenuItem) {
 	C.show_menu_item(
 		C.int(item.id),
 	)
+
 }
 
 //export systray_ready

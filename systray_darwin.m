@@ -21,6 +21,7 @@
     NSString* tooltip;
     short disabled;
     short checked;
+    //MenuItem* menuItem;
 }
 -(id) initWithId: (int)theMenuId
        withTitle: (const char*)theTitle
@@ -48,6 +49,7 @@
 
 @interface AppDelegate: NSObject <NSApplicationDelegate>
   - (void) add_or_update_menu_item:(MenuItem*) item;
+  - (void) add_or_update_submenu_item:(NSArray*) imageAndMenuId ;
   - (IBAction)menuHandler:(id)sender;
   @property (assign) IBOutlet NSWindow *window;
   @end
@@ -107,20 +109,24 @@
   NSNumber* menuId = [sender representedObject];
   systray_menu_item_selected(menuId.intValue);
 }
-
 - (void) add_or_update_menu_item:(MenuItem*) item
 {
   NSMenuItem* menuItem;
-  int existedMenuIndex = [menu indexOfItemWithRepresentedObject: item->menuId];
-  if (existedMenuIndex == -1) {
+  menuItem=find_menu_with_parent(menu,item->menuId);
+  //int existedMenuIndex = [menu indexOfItemWithRepresentedObject: item->menuId];
+  if (menuItem == NULL) {
     menuItem = [menu addItemWithTitle:item->title action:@selector(menuHandler:) keyEquivalent:@""];
     [menuItem setTarget:self];
     [menuItem setRepresentedObject: item->menuId];
+    [menuItem  setTag:[item->menuId integerValue]];
+    
 
   }
   else {
-    menuItem = [menu itemAtIndex: existedMenuIndex];
+    //menuItem = [menu itemAtIndex: existedMenuIndex];
     [menuItem setTitle:item->title];
+    [menuItem  setTag:[item->menuId integerValue]];
+    [menuItem setTarget:self];
   }
   [menuItem setToolTip:item->tooltip];
   if (item->disabled == 1) {
@@ -133,6 +139,107 @@
   } else {
     menuItem.state = NSControlStateValueOff;
   }
+}
+
+NSMenuItem * find_menu_with_parent(NSMenu * ourMenu , NSNumber* parent){
+
+
+    NSLog(@"parent id in menu!!!! %@",parent);
+
+    NSMenuItem* foundItem = [ourMenu itemWithTag:[parent integerValue] ];
+    
+     if(foundItem==NULL){
+        
+        NSArray *menu_items =ourMenu.itemArray;
+        int i;
+        for (i = 0; i < [menu_items count]; i++) {
+
+          NSMenuItem *i_item = [menu_items objectAtIndex:i];
+          if(i_item.hasSubmenu){
+             NSMenuItem* foundItem2 =find_menu_with_parent(i_item.submenu,parent);
+            if(foundItem2==NULL){
+              
+            }else{
+               foundItem=foundItem2;
+               break;
+            }
+          }
+
+        }
+        return foundItem;
+
+
+    }else {
+      return foundItem;
+    } 
+
+
+};
+ 
+- (void) add_or_update_submenu_item:(NSArray*)imageAndMenuId
+{
+  
+  NSNumber* parent = [imageAndMenuId objectAtIndex:0];
+  MenuItem* newItem = [imageAndMenuId objectAtIndex:1];
+  
+  NSMenuItem* foundItem = find_menu_with_parent(menu,parent);
+ 
+  if(foundItem==NULL){
+    NSLog(@"%s",">>> NULL it must not accour !!");
+  }
+
+  if (foundItem.hasSubmenu) {
+        NSMenu *oldMenu = foundItem.submenu;
+
+        NSMenuItem *tempItem = [oldMenu addItemWithTitle:newItem->title action:@selector(menuHandler:) keyEquivalent:@""];
+        tempItem.tag = [newItem->menuId integerValue];
+        tempItem.title = newItem->title;
+        tempItem.action=@selector(menuHandler:);
+        tempItem.target=self;
+        tempItem.representedObject= newItem->menuId;
+
+        //[oldMenu addItem:tempItem];
+        if (newItem->disabled == 1) {
+          tempItem.enabled = FALSE;
+        } else {
+          tempItem.enabled = TRUE;
+        }
+        if (newItem->checked == 1) {
+          tempItem.state = NSControlStateValueOn;
+        } else {
+          tempItem.state = NSControlStateValueOff;
+        }
+        [foundItem setSubmenu:oldMenu];
+       NSLog(@"%s%@","with submenu ",newItem->title);
+  }else{
+    
+    NSMenu *newMenu = [[NSMenu alloc] init];
+   // NSMenuItem *tempItem = [[NSMenuItem alloc] init];
+
+    NSMenuItem *tempItem=[newMenu addItemWithTitle:newItem->title action:@selector(menuHandler:) keyEquivalent:@""];
+
+    tempItem.tag = [newItem->menuId integerValue];
+    tempItem.title = newItem->title;
+    tempItem.toolTip = newItem->tooltip;
+    tempItem.representedObject= newItem->menuId;
+    
+    //tempItem.action=@selector(menuHandler:);
+    [tempItem setTarget:self];
+
+    if (newItem->disabled == 1) {
+        tempItem.enabled = FALSE;
+      } else {
+        tempItem.enabled = TRUE;
+      }
+      if (newItem->checked == 1) {
+        tempItem.state = NSControlStateValueOn;
+      } else {
+        tempItem.state = NSControlStateValueOff;
+      }
+    NSLog(@"%s%@","without submenu ",newItem->title);
+    [foundItem setSubmenu:newMenu];
+  }
+
 }
 
 - (void) add_separator:(NSNumber*) menuId
@@ -156,11 +263,10 @@
   NSNumber* menuId = [imageAndMenuId objectAtIndex:1];
 
   NSMenuItem* menuItem;
-  int existedMenuIndex = [menu indexOfItemWithRepresentedObject: menuId];
-  if (existedMenuIndex == -1) {
+  menuItem=find_menu_with_parent(menu,menuId);
+  if (menuItem == NULL) {
     return;
   }
-  menuItem = [menu itemAtIndex: existedMenuIndex];
   menuItem.image = image;
 }
 
@@ -233,6 +339,14 @@ void add_or_update_menu_item(int menuId, char* title, char* tooltip, short disab
   runInMainThread(@selector(add_or_update_menu_item:), (id)item);
 }
 
+
+void add_or_update_submenu_item(int parent,int menuId, char* title, char* tooltip, short disabled, short checked) {
+  MenuItem* item = [[MenuItem alloc] initWithId: menuId withTitle: title withTooltip: tooltip withDisabled: disabled withChecked: checked];
+  free(title);
+  free(tooltip);
+  NSNumber* parent2=[NSNumber numberWithInt:parent];
+  runInMainThread(@selector(add_or_update_submenu_item:), @[parent2, (id)item]);
+}
 void add_separator(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(add_separator:), (id)mId);

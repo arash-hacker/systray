@@ -14,6 +14,20 @@ func onReady() {
 	systray.SetTooltip("Pretty awesome超级棒")
 	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
 
+	mUrl := systray.AddMenuItem("Open Lantern.org", "my home")
+	mUrl.SetIcon(getIcon("assets/hacker.ico"))
+
+	mmmmm := mUrl.AddSubMenuItem("mmmmmmmUrl-Sub2", "mmmmmmUrl-Sub2")
+	mmmmm.SetTitle("uuuuuuu")
+
+	mUrlSub := mUrl.AddSubMenuItem("mUrl-Sub1", "mUrl-Sub1")
+	mUrlSub.SetIcon(getIcon("assets/hacker.ico"))
+	mUrl.AddSubMenuItem("mUrl-Sub3", "mUrl-Sub3")
+
+	mUrilSubSub := mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub1", "mUrl-Sub1-Sub1")
+	/*          */ mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub2", "mUrl-Sub1-Sub2")
+	/*          */ mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub3", "mUrl-Sub1-Sub3")
+	/*          */ mUrlSub.AddSubMenuItem("mUrl-Sub1-Sub4", "mUrl-Sub1-Sub4")
 	// Sets the icon of a menu item. Only available on Mac.
 	mQuit.SetIcon(icon.Data)
 }
@@ -73,6 +87,6 @@ SystrayApp.app/
 Consult the [Official Apple Documentation here](https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html#//apple_ref/doc/uid/10000123i-CH101-SW1).
 
 ## Credits
-
+![.](1.gif)
 - https://github.com/xilp/systray
 - https://github.com/cratonica/trayhost
