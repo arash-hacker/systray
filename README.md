@@ -1,4 +1,4 @@
-Package systray is a cross platfrom Go library to place an icon and menu in the notification area.
+Package systray is a <del>cross</del> platfrom Go library to place an icon and menu in the notification area.
 Tested on Windows 8, Mac OSX, Ubuntu 14.10 and Debian 7.6.
 
 ## Usage
