@@ -1,5 +1,5 @@
 Package systray is a <del>cross platfrom</del> **MacOS** Go library to place an icon and menu in the notification area.
-Tested on Windows 8, Mac OSX, Ubuntu 14.10 and Debian 7.6.
+Tested on <del>Windows 8, Ubuntu 14.10 and Debian 7.6.</del> Mac OSX
 
 ## Usage
 ```go
